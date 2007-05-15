@@ -14,7 +14,6 @@
 
 require 'rubygems'
 require 'net/http'
-require 'cgi'
 require 'xmlsimple'
 
 class Tvdb
@@ -72,25 +71,6 @@ class Tvdb
     
   end
 
-
-
-  def get_nzb(id)
-    response = Net::HTTP.post_form(URI.parse("#{@host}#{@dnzb}"),{:username => @username, :password => @password, :reportid => id})
-
-    case response["x-dnzb-rcode"].to_i
-    when 200
-      puts "NZB downloaded OK"
-      response.body
-    when 450
-      puts "ERROR 450: 5 nzbs per minute please."
-      false
-    else 
-      puts "ERROR #{response["x-dnzb-rcode"]}: #{response["x-dnzb-rtext"]}"
-      false
-    end
-  
-  end
-
   class Series
     attr_accessor :id, :status, :runtime, :airs_time, :airs_day_of_week, :genre, :name, :overview, :network
     
@@ -143,4 +123,3 @@ class Tvdb
   end
     
 end
-
