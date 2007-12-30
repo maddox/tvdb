@@ -23,6 +23,7 @@ class Tvdb
   end
 
   def http_get(url)
+    puts url
     Net::HTTP.get_response(URI.parse(URI.encode(url))).body.to_s
   end
 
@@ -40,21 +41,34 @@ class Tvdb
 
     series 
   end
+  
 
   def get_episodes(series_id)
     episodes = []
     response = XmlSimple.xml_in(http_get("#{@host}/GetEpisodes.php?seriesid=#{series_id}"), { 'ForceArray' => false })
-
+    response["Item"].delete_at 0
     case response["Item"].class.name
     when "Array"
-      response["Item"].each { |item| episodes << Episode.new(item) if item["EpisodeName"]}
+      response["Item"].each { |item| episodes << Episode.new(episode_updates(item["id"])) if item["EpisodeName"]}
     when "Hash"
-      episodes << Series.new(response["Item"])
+      episodes << Episode.new(response["Item"])
     end
     
-    episodes 
+    episodes
     
   end
+
+  def episode_updates(item_id)
+    response = XmlSimple.xml_in(http_get("#{@host}/EpisodeUpdates.php?idlist=#{item_id}"), { 'ForceArray' => false })
+    response["Item"][1]
+  end
+  
+  def get_episode(series_id, season_num, episode_num)
+    response = XmlSimple.xml_in(http_get("#{@host}/GetEpisodes.php?seriesid=#{series_id}&season=#{season_num}&episode=#{episode_num}"), { 'ForceArray' => false })
+    response["Item"][1]
+
+  end
+
 
   def get_banners(series_id)
     banners = []
@@ -72,12 +86,11 @@ class Tvdb
   end
 
   class Series
-    attr_accessor :id, :status, :runtime, :airs_time, :airs_day_of_week, :genre, :name, :overview, :network
+    attr_accessor :id, :status, :runtime, :airs_time, :airs_day_of_week, :genre, :name, :overview, :network, :seasons
     
-    @seasons = {}
-    @episodes = {}
 
     def initialize(details)
+      @seasons = {}
       @id = details["id"]
       @status = details["Status"]
       @runtime = details["Runtime"]
@@ -89,25 +102,46 @@ class Tvdb
       @network = details["Network"] 
 
       @client = Tvdb.new
+      
     end
-    
-    def episodes
+
+    def retrieve_all_episodes
       @client.get_episodes(@id)
     end
     
-    def banners
+    def retrieve_banners
       @client.get_banners(@id)
     end
+
+    def fill_all_meta
+      retrieve_all_episodes.each do |episode|
+        if @seasons.key? episode.season_number
+          @seasons[episode.season_number][episode.number] = episode
+        else
+          @seasons[episode.season_number] = {episode.number => episode}
+        end
+      end
+    end
+    
+    def episode(season_num, episode_num)
+      
+      Episode.new(@client.episode_updates(@client.get_episode(@id, season_num, episode_num)["id"]))
+    end
+
   end
 
   class Episode
-    attr_accessor :id, :season_number, :number, :name
+    attr_accessor :id, :season_number, :number, :name, :overview, :air_date, :thumb
 
     def initialize(details)
       @id = details["id"]
-      @season_number = details["SeasonNumber"]
-      @number = details["EpisodeNumber"]
-      @name = details["EpisodeName"]
+      @season_number = details["SeasonNumber"].to_s
+      @number = details["EpisodeNumber"].to_s
+      @name = details["EpisodeName"].to_s
+      @overview = details["Overview"].to_s
+      @air_date = details["FirstAired"].to_s
+      puts details["filename"].inspect
+      @thumb = "http://thetvdb.com/banners/" + details["filename"] if details["filename"].to_s != ""
     end
   end
 
