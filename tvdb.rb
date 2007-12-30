@@ -23,7 +23,6 @@ class Tvdb
   end
 
   def http_get(url)
-    puts url
     Net::HTTP.get_response(URI.parse(URI.encode(url))).body.to_s
   end
 
@@ -86,10 +85,12 @@ class Tvdb
   end
 
   class Series
-    attr_accessor :id, :status, :runtime, :airs_time, :airs_day_of_week, :genre, :name, :overview, :network, :seasons
+    attr_accessor :id, :status, :runtime, :airs_time, :airs_day_of_week, 
+                  :genre, :name, :overview, :network, :seasons, :banners
     
 
     def initialize(details)
+      @client = Tvdb.new
       @seasons = {}
       @id = details["id"]
       @status = details["Status"]
@@ -99,9 +100,13 @@ class Tvdb
       @genre = details["Genre"]
       @name = details["SeriesName"]
       @overview = details["Overview"]
-      @network = details["Network"] 
+      @network = details["Network"]
 
-      @client = Tvdb.new
+      @banners = {}
+      @banners["text"] = []
+      @banners["graphical"] = []
+      @banners["season"] = {}
+      @banners["seasonwide"] = {}
       
     end
 
@@ -110,7 +115,23 @@ class Tvdb
     end
     
     def retrieve_banners
-      @client.get_banners(@id)
+      banners = @client.get_banners(@id)
+
+      banners.each do |banner|
+        case banner.banner_type
+        when /text/i
+          @banners["text"] << "http://www.thetvdb.com/banners/" + banner.path
+        when /graphical/i
+          @banners["graphical"] << "http://www.thetvdb.com/banners/" + banner.path
+        when /seasonwide/i
+          @banners["seasonwide"][banner.season] = [] if @banners["seasonwide"][banner.season] == nil
+          @banners["seasonwide"][banner.season] << "http://www.thetvdb.com/banners/" + banner.path
+        when /season/i
+          @banners["season"][banner.season] = [] unless @banners["season"][banner.season]
+          @banners["season"][banner.season] << "http://www.thetvdb.com/banners/" + banner.path
+        end
+      end
+
     end
 
     def fill_all_meta
@@ -140,7 +161,6 @@ class Tvdb
       @name = details["EpisodeName"].to_s
       @overview = details["Overview"].to_s
       @air_date = details["FirstAired"].to_s
-      puts details["filename"].inspect
       @thumb = "http://thetvdb.com/banners/" + details["filename"] if details["filename"].to_s != ""
     end
   end
