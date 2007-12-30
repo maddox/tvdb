@@ -6,8 +6,9 @@
 require 'tvdb'
 
 tvdb = Tvdb.new
-results = tvdb.search("Heroes")
+results = tvdb.search("The Game")
 
 series = results.first
 
+puts series.overview
 

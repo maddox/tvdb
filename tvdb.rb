@@ -145,8 +145,11 @@ class Tvdb
     end
     
     def episode(season_num, episode_num)
-      
-      Episode.new(@client.episode_updates(@client.get_episode(@id, season_num, episode_num)["id"]))
+      begin
+        Episode.new(@client.episode_updates(@client.get_episode(@id, season_num, episode_num)["id"]))        
+      rescue 
+        nil
+      end
     end
 
   end
