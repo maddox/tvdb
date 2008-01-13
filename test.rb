@@ -6,9 +6,7 @@
 require 'tvdb'
 
 tvdb = Tvdb.new
-results = tvdb.search("The Game")
-
+results = tvdb.search("life of ryan")
 series = results.first
 
-puts series.overview
-
+puts series.network

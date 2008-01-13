@@ -93,14 +93,14 @@ class Tvdb
       @client = Tvdb.new
       @seasons = {}
       @id = details["id"]
-      @status = details["Status"]
-      @runtime = details["Runtime"]
-      @airs_time = details["Airs_Time"]
+      @status = details["Status"] unless details["Status"].class == Hash
+      @runtime = details["Runtime"] unless details["Runtime"].class == Hash
+      @airs_time = details["Airs_Time"] unless details["Airs_Time"].class == Hash
       @airs_day_of_week = details["Airs_DayOfWeek"]
-      @genre = details["Genre"]
+      @genre = details["Genre"] unless details["Genre"].class == Hash
       @name = details["SeriesName"]
-      @overview = details["Overview"]
-      @network = details["Network"]
+      @overview = details["Overview"] unless details["Overview"].class == Hash
+      @network = details["Network"] unless details["Network"].class == Hash
 
       @banners = {}
       @banners["text"] = []
