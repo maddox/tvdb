@@ -6,7 +6,6 @@
 require 'tvdb'
 
 tvdb = Tvdb.new
-results = tvdb.search("life of ryan")
-series = results.first
-
-puts series.network
+scrubs = tvdb.search("scrubs")
+scrubs.retrieve_banners
+puts scrubs.banners.inspect
