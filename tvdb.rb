@@ -91,6 +91,7 @@ class Tvdb
       
       @banners = {}
       @banners["graphical"] = []
+      @banners["poster"] = []
       @banners["season"] = {}
       
     end
@@ -106,6 +107,8 @@ class Tvdb
         case banner.banner_type
         when /series/i
           @banners["graphical"] << "http://www.thetvdb.com/banners/" + banner.path if banner.language == 'en' && banner.banner_type2 =~ /graphical/i
+        when /poster/i
+          @banners["poster"] << "http://www.thetvdb.com/banners/" + banner.path if banner.language == 'en'
         when /season/i
           @banners["season"][banner.season] = "http://www.thetvdb.com/banners/" + banner.path if banner.language == 'en' &&  banner.banner_type2 =~ /season$/i
         end
