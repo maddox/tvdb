@@ -106,11 +106,11 @@ class Tvdb
       banners.each do |banner|
         case banner.banner_type
         when /series/i
-          @banners["graphical"] << "http://www.thetvdb.com/banners/" + banner.path if banner.language == 'en' && banner.banner_type2 =~ /graphical/i
+          @banners["graphical"] << "http://images.thetvdb.com/banners/" + banner.path if banner.language == 'en' && banner.banner_type2 =~ /graphical/i
         when /poster/i
-          @banners["poster"] << "http://www.thetvdb.com/banners/" + banner.path if banner.language == 'en'
+          @banners["poster"] << "http://images.thetvdb.com/banners/" + banner.path if banner.language == 'en'
         when /season/i
-          @banners["season"][banner.season] = "http://www.thetvdb.com/banners/" + banner.path if banner.language == 'en' &&  banner.banner_type2 =~ /season$/i
+          @banners["season"][banner.season] = "http://images.thetvdb.com/banners/" + banner.path if banner.language == 'en' &&  banner.banner_type2 =~ /season$/i
         end
       end
 

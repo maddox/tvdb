@@ -6,6 +6,23 @@
 require 'tvdb'
 
 tvdb = Tvdb.new
-scrubs = tvdb.search("scrubs")
+scrubs = tvdb.search("Bionic Woman")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("newhart")
+scrubs = tvdb.search("Bionic Woman")
 scrubs.retrieve_banners
 puts scrubs.banners.inspect
