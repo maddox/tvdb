@@ -26,8 +26,20 @@ class Tvdb
     Net::HTTP.get_response(URI.parse(URI.encode(url))).body.to_s
   end
   
+  def find_series_id_by_name(series_name)
+    puts "#{@host}/GetSeries.php?seriesname=#{series_name}"
+    response = XmlSimple.xml_in(http_get("#{@host}/GetSeries.php?seriesname=#{series_name}"), { 'ForceArray' => false })
+    case response["Series"]
+    when Array
+      response["Series"][0]["seriesid"]
+    when Hash
+      response["Series"]["seriesid"]
+    end
+  end
+
   def search(series_name)
     response = XmlSimple.xml_in(http_get("#{@host}/GetSeries.php?seriesname=#{series_name}"), { 'ForceArray' => false })
+    puts response.inspect
     case response["Series"]
     when Array
       Series.new(response["Series"].first)
@@ -36,6 +48,12 @@ class Tvdb
     end
   end
   
+  def find_series_by_id(series_id)
+    puts "#{@host}/#{API_KEY}/series/#{series_id}/en.xml"
+    response = XmlSimple.xml_in(http_get("#{@host}/#{API_KEY}/series/#{series_id}/en.xml"), { 'ForceArray' => false })
+    puts response.inspect
+    Series.new(response["Series"])
+  end
 
   def get_episodes(series_id)
     episodes = []
@@ -79,7 +97,7 @@ class Tvdb
   end
 
   class Series
-    attr_accessor :id, :name, :overview, :seasons, :banners
+    attr_accessor :id, :name, :overview, :seasons, :banners, :first_aired, :genres, :network, :rating, :runtime
     
 
     def initialize(details)
@@ -88,6 +106,16 @@ class Tvdb
       @id = details["id"]
       @name = details["SeriesName"]
       @overview = details["Overview"] unless details["Overview"].class == Hash
+      @first_aired = Date.parse(details["FirstAired"]) if details["FirstAired"].size > 0 
+      @genres = details["Genre"][1..-1].split("|") if details["Genre"].size > 0 
+      @network = details["Network"]
+      @runtime = details["Runtime"] if details["Runtime"].size > 0
+
+      if details["Rating"].size > 0
+        @rating = details["Rating"].to_f
+      else
+        @rating = 0
+      end
       
       @banners = {}
       @banners["graphical"] = []
@@ -106,11 +134,11 @@ class Tvdb
       banners.each do |banner|
         case banner.banner_type
         when /series/i
-          @banners["graphical"] << "http://images.thetvdb.com/banners/" + banner.path if banner.language == 'en' && banner.banner_type2 =~ /graphical/i
+          @banners["graphical"] << "http://thetvdb.com/banners/" + banner.path if banner.language == 'en' && banner.banner_type2 =~ /graphical/i
         when /poster/i
-          @banners["poster"] << "http://images.thetvdb.com/banners/" + banner.path if banner.language == 'en'
+          @banners["poster"] << "http://thetvdb.com/banners/" + banner.path if banner.language == 'en'
         when /season/i
-          @banners["season"][banner.season] = "http://images.thetvdb.com/banners/" + banner.path if banner.language == 'en' &&  banner.banner_type2 =~ /season$/i
+          @banners["season"][banner.season] = "http://thetvdb.com/banners/" + banner.path if banner.language == 'en' &&  banner.banner_type2 =~ /season$/i
         end
       end
 

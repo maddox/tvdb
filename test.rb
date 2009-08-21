@@ -6,23 +6,10 @@
 require 'tvdb'
 
 tvdb = Tvdb.new
-scrubs = tvdb.search("Bionic Woman")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("newhart")
-scrubs = tvdb.search("Bionic Woman")
-scrubs.retrieve_banners
-puts scrubs.banners.inspect
+office_id = tvdb.find_series_id_by_name("Good Game")
+puts office_id
+office = tvdb.find_series_by_id(office_id)
+
+puts office.inspect
+# scrubs.retrieve_banners
+# puts scrubs.banners.inspect
