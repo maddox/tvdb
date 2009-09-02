@@ -15,6 +15,7 @@
 require 'rubygems'
 require 'net/http'
 require 'xmlsimple'
+require 'cgi'
 
 class Tvdb
   API_KEY = "A97A9243F8030477"
@@ -23,10 +24,12 @@ class Tvdb
   end
 
   def http_get(url)
-    Net::HTTP.get_response(URI.parse(URI.encode(url))).body.to_s
+    puts "escaped uri: " + url
+    Net::HTTP.get_response(URI.parse(url)).body.to_s
   end
   
   def find_series_id_by_name(series_name)
+    series_name = URI.escape(series_name).gsub('&', '%26').gsub(':', '%3A')
     puts "#{@host}/GetSeries.php?seriesname=#{series_name}"
     response = XmlSimple.xml_in(http_get("#{@host}/GetSeries.php?seriesname=#{series_name}"), { 'ForceArray' => false })
     case response["Series"]
@@ -38,8 +41,8 @@ class Tvdb
   end
 
   def search(series_name)
+    series_name = URI.escape(series_name).gsub('&', '%26').gsub(':', '%3A')
     response = XmlSimple.xml_in(http_get("#{@host}/GetSeries.php?seriesname=#{series_name}"), { 'ForceArray' => false })
-    puts response.inspect
     case response["Series"]
     when Array
       Series.new(response["Series"].first)
@@ -51,7 +54,6 @@ class Tvdb
   def find_series_by_id(series_id)
     puts "#{@host}/#{API_KEY}/series/#{series_id}/en.xml"
     response = XmlSimple.xml_in(http_get("#{@host}/#{API_KEY}/series/#{series_id}/en.xml"), { 'ForceArray' => false })
-    puts response.inspect
     Series.new(response["Series"])
   end
 
@@ -103,6 +105,7 @@ class Tvdb
     def initialize(details)
       @client = Tvdb.new
       @seasons = {} 
+      @genres = []
       @id = details["id"]
       @name = details["SeriesName"]
       @overview = details["Overview"] unless details["Overview"].class == Hash

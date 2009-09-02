@@ -6,7 +6,7 @@
 require 'tvdb'
 
 tvdb = Tvdb.new
-office_id = tvdb.find_series_id_by_name("Good Game")
+office_id = tvdb.find_series_id_by_name("law & order: Criminal Intent")
 puts office_id
 office = tvdb.find_series_by_id(office_id)
 
